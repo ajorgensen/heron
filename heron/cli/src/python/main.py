@@ -33,6 +33,7 @@ import heron.cli.src.python.restart as restart
 import heron.cli.src.python.submit as submit
 import heron.common.src.python.utils.config as config
 import heron.cli.src.python.version as version
+import heron.cli.src.python.resources as resources
 
 HELP_EPILOG = '''Getting more help:
   heron help <command> Prints help and options for <command>
@@ -95,6 +96,7 @@ def create_parser():
   restart.create_parser(subparsers)
   submit.create_parser(subparsers)
   version.create_parser(subparsers)
+  resources.create_parser(subparsers)
 
   return parser
 
@@ -131,8 +133,10 @@ def run(command, parser, command_args, unknown_args):
   elif command == 'version':
     status = version.run(command, parser, command_args, unknown_args)
 
-  return status
+  elif command == 'resources':
+    status = resources.run(command, parser, command_args, unknown_args)
 
+  return status
 
 def cleanup(files):
   '''
