@@ -33,6 +33,7 @@ import heron.tools.cli.src.python.restart as restart
 import heron.tools.cli.src.python.submit as submit
 import heron.tools.cli.src.python.update as update
 import heron.tools.cli.src.python.version as version
+import heron.cli.src.python.resources as resources
 
 Log = log.Log
 
@@ -87,6 +88,7 @@ def create_parser():
   submit.create_parser(subparsers)
   update.create_parser(subparsers)
   version.create_parser(subparsers)
+  resources.create_parser(subparsers)
 
   return parser
 
@@ -110,6 +112,7 @@ def run(command, parser, command_args, unknown_args):
       'update':update,
       'help':cli_help,
       'version':version,
+      'resources':resources,
   }
 
   if command in runners:
