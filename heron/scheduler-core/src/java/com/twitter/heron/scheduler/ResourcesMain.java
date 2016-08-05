@@ -112,13 +112,8 @@ public class ResourcesMain {
 
     ObjectNode rootNode = mapper.createObjectNode();
     ObjectNode containerNode = mapper.createObjectNode();
-    ObjectNode totalsNode = mapper.createObjectNode();
 
     rootNode.put("topology_name", topologyName);
-
-    totalsNode.put("cpu", packingPlan.resource.cpu);
-    totalsNode.put("ram", packingPlan.resource.ram);
-    totalsNode.put("disk", packingPlan.resource.disk);
 
     for (Map.Entry<String, PackingPlan.ContainerPlan> entry : packingPlan.containers.entrySet()) {
       String containerId = entry.getKey();
@@ -134,7 +129,6 @@ public class ResourcesMain {
     }
 
     rootNode.putPOJO("containers", containerNode);
-    rootNode.putPOJO("totals", totalsNode);
 
     return mapper.writeValueAsString(rootNode);
   }
