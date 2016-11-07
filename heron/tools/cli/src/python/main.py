@@ -33,7 +33,7 @@ import heron.tools.cli.src.python.restart as restart
 import heron.tools.cli.src.python.submit as submit
 import heron.tools.cli.src.python.update as update
 import heron.tools.cli.src.python.version as version
-import heron.cli.src.python.resources as resources
+import heron.tools.cli.src.python.resources as resources
 
 Log = log.Log
 

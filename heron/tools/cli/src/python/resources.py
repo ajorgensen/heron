@@ -13,14 +13,16 @@
 '''resources.py'''
 import glob
 import shutil
+import logging
 
 from heron.proto import topology_pb2
-import heron.cli.src.python.execute as execute
-import heron.cli.src.python.jars as jars
-import heron.cli.src.python.args as cli_args
-import heron.cli.src.python.opts as opts
-import heron.cli.src.python.topology as topology
-import heron.common.src.python.utils.config as config
+import heron.tools.cli.src.python.execute as execute
+import heron.tools.cli.src.python.jars as jars
+import heron.tools.cli.src.python.args as cli_args
+import heron.tools.cli.src.python.topology as topology
+import heron.tools.common.src.python.utils.config as config
+
+from heron.common.src.python.utils.log import Log
 
 def create_parser(subparsers):
   '''
@@ -86,7 +88,7 @@ def run(command, parser, cl_args, unknown_args):
           "--release_file", release_yaml_file,
       ]
 
-      if opts.verbose():
+      if Log.getEffectiveLevel() == logging.DEBUG:
         new_args.append("--verbose")
 
       lib_jars = config.get_heron_libs(

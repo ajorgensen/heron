@@ -16,10 +16,10 @@
 ''' topology.py '''
 import tempfile
 
-import heron.cli.src.python.execute as execute
-import heron.cli.src.python.jars as jars
-import heron.cli.src.python.opts as opts
-import heron.common.src.python.utils.config as config
+import heron.tools.cli.src.python.execute as execute
+import heron.tools.cli.src.python.jars as jars
+import heron.tools.cli.src.python.opts as opts
+import heron.tools.common.src.python.utils.config as config
 
 def generate_definition(topology_file, topology_class, jvm_properties, args, initial_state):
   tmp_dir = tempfile.mkdtemp()

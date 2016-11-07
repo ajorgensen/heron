@@ -13,9 +13,21 @@
 // limitations under the License.
 package com.twitter.heron.scheduler;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.DefaultParser;
+import org.apache.commons.cli.HelpFormatter;
+import org.apache.commons.cli.Option;
+import org.apache.commons.cli.Options;
+import org.apache.commons.cli.ParseException;
+
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.spi.common.ClusterConfig;
 import com.twitter.heron.spi.common.ClusterDefaults;
@@ -27,22 +39,13 @@ import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.packing.Resource;
 import com.twitter.heron.spi.utils.ReflectionUtils;
 import com.twitter.heron.spi.utils.TopologyUtils;
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.CommandLineParser;
-import org.apache.commons.cli.DefaultParser;
-import org.apache.commons.cli.HelpFormatter;
-import org.apache.commons.cli.Option;
-import org.apache.commons.cli.Options;
-import org.apache.commons.cli.ParseException;
 
-import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import java.util.logging.SimpleFormatter;
-import java.util.logging.StreamHandler;
-
-public class ResourcesMain {
+public final class ResourcesMain {
   private static final Logger LOG = Logger.getLogger(ResourcesMain.class.getName());
+
+  private ResourcesMain() {
+
+  }
 
   public static void main(String... args) throws ParseException {
     // construct the options and help options first.
@@ -79,35 +82,29 @@ public class ResourcesMain {
     TopologyAPI.Topology topology = TopologyUtils.getTopology(topologyDefnFile);
 
     Config config = Config.newBuilder()
-            .putAll(defaultConfigs(heronHome, configPath, releaseFile))
-            .putAll(overrideConfigs(overrideConfigFile))
-            .putAll(commandLineConfigs(cluster, role, environment, verbose))
-            .putAll(topologyConfigs(topologyDefnFile, topology))
-            .build();
+        .putAll(defaultConfigs(heronHome, configPath, releaseFile))
+        .putAll(overrideConfigs(overrideConfigFile))
+        .putAll(commandLineConfigs(cluster, role, environment, verbose))
+        .putAll(topologyConfigs(topologyDefnFile, topology))
+        .build();
 
     String packingClass = Context.packingClass(config);
     IPacking packing;
     try {
       // create an instance of the packing class
       packing = ReflectionUtils.newInstance(packingClass);
-
-      Config runtime = Config.newBuilder()
-          .put(Keys.topologyId(), topology.getId())
-          .put(Keys.topologyName(), topology.getName())
-          .put(Keys.topologyDefinition(), topology)
-          .put(Keys.numContainers(), 1 + TopologyUtils.getNumContainers(topology))
-          .build();
-
-      packing.initialize(config, runtime);
+      packing.initialize(config, topology);
       PackingPlan plan = packing.pack();
 
-      System.out.println(formatContainerResources(topology.getName() ,plan));
-    } catch (Exception e) {
+      LOG.log(Level.INFO, formatContainerResources(topology.getName(), plan));
+    } catch (IllegalAccessException | JsonProcessingException
+        | ClassNotFoundException | InstantiationException e) {
       LOG.log(Level.SEVERE, "Failed to instantiate instances", e);
     }
   }
 
-  static String formatContainerResources(String topologyName, PackingPlan packingPlan) throws JsonProcessingException {
+  static String formatContainerResources(String topologyName, PackingPlan packingPlan)
+      throws JsonProcessingException {
     ObjectMapper mapper = new ObjectMapper();
 
     ObjectNode rootNode = mapper.createObjectNode();
@@ -116,21 +113,20 @@ public class ResourcesMain {
 
     rootNode.put("topology_name", topologyName);
 
-    totalsNode.put("cpu", packingPlan.resource.cpu);
-    totalsNode.put("ram", packingPlan.resource.ram);
-    totalsNode.put("disk", packingPlan.resource.disk);
+    totalsNode.put("cpu", packingPlan.getMaxContainerResources().getCpu());
+    totalsNode.put("ram", packingPlan.getMaxContainerResources().getRam());
+    totalsNode.put("disk", packingPlan.getMaxContainerResources().getDisk());
 
-    for (Map.Entry<String, PackingPlan.ContainerPlan> entry : packingPlan.containers.entrySet()) {
-      String containerId = entry.getKey();
-      PackingPlan.ContainerPlan containerPlan = entry.getValue();
-      Resource resources = containerPlan.resource;
+    for (PackingPlan.ContainerPlan containerPlan : packingPlan.getContainers()) {
+      String id = Integer.toString(containerPlan.getId());
+      Resource resources = containerPlan.getRequiredResource();
 
       ObjectNode containerResources = mapper.createObjectNode();
-      containerResources.put("cpu", resources.cpu);
-      containerResources.put("ram", resources.ram);
-      containerResources.put("disk", resources.disk);
+      containerResources.put("cpu", resources.getCpu());
+      containerResources.put("ram", resources.getRam());
+      containerResources.put("disk", resources.getDisk());
 
-      containerNode.putPOJO(containerId, containerResources);
+      containerNode.putPOJO(id, containerResources);
     }
 
     rootNode.putPOJO("containers", containerNode);
