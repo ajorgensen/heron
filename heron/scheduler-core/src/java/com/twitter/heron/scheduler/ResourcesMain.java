@@ -96,7 +96,7 @@ public final class ResourcesMain {
       packing.initialize(config, topology);
       PackingPlan plan = packing.pack();
 
-      LOG.log(Level.INFO, formatContainerResources(topology.getName(), plan));
+      System.out.println(formatContainerResources(topology.getName(), plan));
     } catch (IllegalAccessException | JsonProcessingException
         | ClassNotFoundException | InstantiationException e) {
       LOG.log(Level.SEVERE, "Failed to instantiate instances", e);
