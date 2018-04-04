@@ -302,9 +302,9 @@ maven_jar(
   artifact = "com.esotericsoftware:reflectasm:1.11.3",
 )
 
-maven_jar(		
-  name = "org_objectweb_asm",		
-  artifact = "org.ow2.asm:asm:5.0.4",		
+maven_jar(
+  name = "org_objectweb_asm",
+  artifact = "org.ow2.asm:asm:5.0.4",
 )
 
 maven_jar(
@@ -816,6 +816,13 @@ new_http_archive(
     urls = ["https://github.com/libevent/libevent/releases/download/release-2.1.8-stable/libevent-2.1.8-stable.tar.gz"],
     strip_prefix = "libevent-2.1.8-stable",
     build_file = "third_party/libevent/libevent.BUILD",
+)
+
+new_http_archive(
+    name = "org_openssl_openssl",
+    urls = ["https://www.openssl.org/source/openssl-1.1.0h.tar.gz"],
+    strip_prefix = "openssl-1.1.0h",
+    build_file = "third_party/openssl/openssl.BUILD",
 )
 
 new_http_archive(
