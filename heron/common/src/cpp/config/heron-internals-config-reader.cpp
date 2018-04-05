@@ -292,6 +292,24 @@ int HeronInternalsConfigReader::GetHeronInstanceReconnectStreammgrTimes() {
       .as<int>();
 }
 
+sp_string HeronInternalsConfigReader::GetHeronStreammgrEncryptionCertificatePath() {
+  if (YAML::Node value =
+          config_[HeronInternalsConfigVars::HERON_STREAMMGR_ENCRYPTION_CERTIFICATE_PATH]) {
+    return value.as<std::string>();
+  }
+
+  return "";
+}
+
+sp_string HeronInternalsConfigReader::GetHeronStreammgrEncryptionPrivateKeyPath() {
+  if (YAML::Node value =
+          config_[HeronInternalsConfigVars::HERON_STREAMMGR_ENCRYPTION_PRIVATE_KEY_PATH]) {
+    return value.as<std::string>();
+  }
+
+  return "";
+}
+
 int HeronInternalsConfigReader::GetHeronInstanceInternalBoltReadQueueCapacity() {
   return config_[HeronInternalsConfigVars::HERON_INSTANCE_INTERNAL_BOLT_READ_QUEUE_CAPACITY]
       .as<int>();
